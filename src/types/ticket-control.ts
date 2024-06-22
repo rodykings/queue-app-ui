@@ -7,4 +7,5 @@ export type TicketControl = {
   lastRegisterTicketTimestamp?: Date;
   lastEntryTicket?: number;
   lastEntryTicketTimestamp?: Date;
+  lastWaitingTimeMinutes: number;
 };
