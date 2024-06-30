@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
@@ -7,6 +7,8 @@ import { cn } from "../utils/tailwind-clsx";
 import { TicketControl } from "../types/ticket-control";
 
 function Dashboard() {
+  const socketRef = useRef(null);
+
   const fetchTicketControl = async () => {
     const response = await axios.get(
       "http://localhost:8000/api/ticket-control"
@@ -22,15 +24,18 @@ function Dashboard() {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const socket = io("http://localhost:8000");
+    if (!socketRef.current) {
+      const socket = io("http://localhost:8000");
 
-    socket.on("ticket-control", (data) => {
-      queryClient.setQueryData(["ticket-control"], data);
-    });
+      socket.on("ticket-control", (data) => {
+        queryClient.setQueryData(["ticket-control"], data);
+      });
 
-    return () => {
-      socket.off();
-    };
+      return () => {
+        socket.disconnect();
+        socketRef.current = null;
+      };
+    }
   }, []);
 
   return (
